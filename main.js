@@ -1,25 +1,28 @@
 
 const express = require('express');
+const app = express();
 const handlebars = require('express-handlebars');
+
 const {Server: HTTPServer} = require("http");
-const normalize = require("normalizr").normalize;
-const schema = require("normalizr").schema;
+const {Server: IOServer} = require("socket.io");
+const httpServer = new HTTPServer(app);
+const io = new IOServer(httpServer);
+
+const {normalize, schema} = require("normalizr");
 const fs = require('fs');
 const { faker } = require("@faker-js/faker");
 faker.locale = "es";
-const {Server: IOServer} = require("socket.io")
-const app = express();
-const httpServer = new HTTPServer(app)
-const io = new IOServer(httpServer)
 
 
+
+
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
 
 //productos
 const {optionsSQL} = require("./options/mysql.js");
 const ContenedorProductos = require('./clase-contenedor.js');
 const arrayProductos = new ContenedorProductos(optionsSQL, "productos");
-
-
 
 //mensajes
 const  mongoose  = require("mongoose");
@@ -46,6 +49,7 @@ const mensajeSchemaMongo = new Schema({
 
 
 app.use(express.static('views'))
+
 //*HANDLEBARS
 app.set('views', './views/')
  const hbs = handlebars.engine({
@@ -53,26 +57,13 @@ app.set('views', './views/')
    layoutsDir: "./views/layouts/",
  });
  app.engine("hbs", hbs);
-
  app.set("view engine", "hbs")
 
 
- app.use(express.urlencoded({extended: true}))
- app.use(express.json())
 
 
- app.get('/', async (req, res)=>{
-    const listaProductos = await arrayProductos.getAll();
-    if(listaProductos){
-        res.render("main", { layout: "vista-productos", productos: listaProductos });
-    }else{
-        res.render("main", {layout: "error"})
-    }
-})
 
 //productos-test
-
-
 async function crearProductosRandom(){
     let listaProductos = [];
     for(let i=0; i<5; i++){
@@ -92,15 +83,24 @@ async function crearProductosRandom(){
     }))
     let productosRandom = await fs.promises.readFile("./productos.txt", "utf-8");
     let prodRandomString = await JSON.parse(productosRandom)
-    console.log(prodRandomString)
     return prodRandomString;
     
 }
 const listaProductosRandom = crearProductosRandom();
-;
 
+//RUTAS:
 app.get('/api/productos-test', async (req, res)=>{
     res.render("main", { layout: "productos-random", productos: listaProductosRandom});
+})
+
+
+app.get('/', async (req, res)=>{
+    const listaProductos = await arrayProductos.getAll();
+    if(listaProductos){
+        res.render("main", { layout: "vista-productos", productos: listaProductos });
+    }else{
+        res.render("main", {layout: "error"})
+    }
 })
 
 
@@ -131,7 +131,7 @@ io.on('connection', async (socket) =>{
             edad,
             avatar,
             alias,
-            idAttirbute: 'email'
+            id: 'email'
         });
         const textSchema = new schema.Entity('text');
         const mensajeSchema = new schema.Entity('mensajes', {
@@ -143,12 +143,6 @@ io.on('connection', async (socket) =>{
         io.sockets.emit('mensajes', normalizado)
     })
 })
-
-
-
-
-
-
 
 
 httpServer.listen(8080, ()=>{

@@ -1,4 +1,4 @@
-const denormalize = require("normalizr").denormalize;
+const denormalize = require("normalizr");
 
 //FRONTEND
 //' conexión del socket del lado del cliente
@@ -97,11 +97,9 @@ socket.on('productos-random', data =>{
 
 //productos random:
 function renderProductosRandom(data){
-    //por cada objeto de producto ingresado crear una row en la tabla con la información:
     const html = data.map( msg =>
         `
         <tr>
-            
             <td rowspan="1" colspan="10" style=" font-weight:normal;  padding:5px; ">
             ${msg.title}
             </td >
