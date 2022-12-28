@@ -1,9 +1,7 @@
 const {optionsSQL} = require("./options/mysql.js");
 const knex = require("knex")(optionsSQL);
-const { faker } = require( '@faker-js/faker');
-faker.locale = "es";
 
-/*
+
 knex.schema
 .createTable("productos", (table) =>{
     table.increments("id"), 
@@ -19,26 +17,28 @@ knex.schema
     throw new Error(err);
 
 })
-*/ 
-function crearProductosRandom(){
-    knex("productos")
-    .insert({
-            title:  faker.commerce.product(),
-            price: faker.commerce.price(100, 200, 0, '$'),
-            thumbnail: faker.image.imageUrl(100, 100)
-        })
-    .then(()=>{
-        console.log("logré insertar producto random");
-    })
-    .catch((err)=>{
-        console.log(err);
-    })
-    .finally(()=>{
-        knex.destroy();
-    })
-}
 
-for(let i=0; i<5; i++){
-    crearProductosRandom()
-}
+
+knex("productos")
+.insert({title: "billetera", price:8000, thumbnail:"https://www.xlshop.com.ar/arquivos/ids/201380-1000-1000/XT2SLI17B0626.jpg?v=638011776835970000Ñ"})
+.then(()=>{
+    console.log("logré insertar");
+})
+.catch((err)=>{
+    console.log(err);
+})
+.finally(()=>{
+    knex.destroy();
+})
+/*
+knex.from("productos")
+.where("id", "=", 1)
+.del()
+.catch((e)=>{
+    console.log(e)
+}).finally(()=>{
+    knex.destroy()
+})
+
+*/
 

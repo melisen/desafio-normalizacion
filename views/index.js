@@ -1,3 +1,4 @@
+const denormalize = require("normalizr").denormalize;
 
 //FRONTEND
 //' conexión del socket del lado del cliente
@@ -52,7 +53,7 @@ function enviarProducto(){
 }
 
 function enviarMensaje(event){
-    const fecha = new Date().toLocaleDateString()+ new Date().toTimeString()
+    const fecha = new Date().toLocaleDateString()+ new Date().toTimeString();
     const nombre = document.getElementById('nombre').value;
     const apellido = document.getElementById('apellido').value;
     const email = document.getElementById('email').value;
@@ -67,6 +68,7 @@ function enviarMensaje(event){
                 apellido,
                 edad,
                 alias,
+                avatar,
                 text,
                 fecha
         })
@@ -84,7 +86,32 @@ socket.on('productos', data =>{
 })
 
 socket.on('mensajes', data =>{
-    renderChat(data)
+    const denormalizedMensajes = denormalize(data, mensajeSchema, data.entities);
+    renderChat(denormalizedMensajes);
+})
+
+socket.on('productos-random', data =>{
+    renderProductosRandom(data)
 })
 
 
+//productos random:
+function renderProductosRandom(data){
+    //por cada objeto de producto ingresado crear una row en la tabla con la información:
+    const html = data.map( msg =>
+        `
+        <tr>
+            
+            <td rowspan="1" colspan="10" style=" font-weight:normal;  padding:5px; ">
+            ${msg.title}
+            </td >
+            <td rowspan="1" colspan="20" style=" font-weight:normal;  padding:5px;">
+            $ ${msg.price}
+            </td>
+            <td rowspan="1" colspan="10" style=" font-weight:normal; padding:5px;">
+              <img src="${msg.thumbnail}" height="100px">
+            </td>
+        </tr>
+      `).join(" ");
+      document.getElementById('productos-random').innerHTML = html; 
+}
