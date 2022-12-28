@@ -22,7 +22,7 @@ class ContenedorMongoDB{
 
 
     async listarTodos(){
-        const todos = await this.coleccion.find();
+        const todos = await this.coleccion.find({});
     }
 
 

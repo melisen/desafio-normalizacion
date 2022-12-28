@@ -111,8 +111,8 @@ io.on('connection', async (socket) =>{
             text: [ textSchema ]
            });
 
-        
-        io.sockets.emit('mensajes', listaMensajes)
+           const normalizado = normalize(listaMensajes, mensajeSchema);
+        io.sockets.emit('mensajes', normalizado)
     })
 })
 
